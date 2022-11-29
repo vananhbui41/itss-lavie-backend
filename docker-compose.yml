@@ -4,7 +4,7 @@ services:
     build:
       context: ./
       dockerfile: php.Dockerfile
-    container_name: directory-php-73
+    container_name: dictionary-php-73
     volumes:
       - ./:/var/www/html
 
@@ -24,10 +24,10 @@ services:
   db:
     platform: linux/x86_64
     image: mysql:5.7
-    container_name: directory-mysql-db
+    container_name: dictionary-mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: directoryDB
+      MYSQL_DATABASE: dictionaryDB
       MYSQL_USER: sampleUser
       MYSQL_PASSWORD: password
     ports:
