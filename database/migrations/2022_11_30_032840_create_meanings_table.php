@@ -15,7 +15,6 @@ class CreateMeaningsTable extends Migration
     {
         Schema::create('meanings', function (Blueprint $table) {
             $table->id();
-            $table->integer('wordId');
             $table->string('word');
             $table->string('meaning');
             $table->string('dongnghia');
