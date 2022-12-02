@@ -2,33 +2,61 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    use HttpResponses;
+
+    public function register(StoreUserRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed'
-        ]);
+        $request->validated($request->all());
 
         $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => \bcrypt($data['password'])
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password)
         ]);
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
-
-        $response = [
+        return $this->success([
             'user' => $user,
-            'token' => $token
-        ];
+            'token' => $user->createToken('API Token of' . $user->name)->plainTextToken
+        ]);
+    }
 
-        return \response($response, 201);
+    public function login(LoginUserRequest $request)
+    {
+        $request->validated($request->true);
+
+        
+        if (!Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password
+            ])) 
+        {
+            return $this->error('', 'Credentials do not match', 401);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        
+        return $this->success([
+            'user' => $user,
+            'token' => $user->createToken('Api Token of' . $user->name)->plainTextToken,
+        ]);
+    }
+
+    public function logout()
+    {
+        Auth::user()->tokens()->delete();
+
+        return $this->success([
+            'message' => 'Logout successful.'
+        ]);
     }
 }
