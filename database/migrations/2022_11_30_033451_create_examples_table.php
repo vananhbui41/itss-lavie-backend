@@ -15,8 +15,7 @@ class CreateExamplesTable extends Migration
     {
         Schema::create('examples', function (Blueprint $table) {
             $table->id();
-            $table->integer('word_id');
-            $table->integer('tag_id');
+            $table->integer('meaning_id');
             $table->string('image');
             $table->string('meaning');
             $table->timestamps();
