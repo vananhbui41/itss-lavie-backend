@@ -8,6 +8,7 @@ use App\Models\Meaning;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
+use Illuminate\Database\QueryException;
 
 class MeaningController extends Controller
 {
@@ -97,31 +98,53 @@ class MeaningController extends Controller
         $category = $request->category;
 
         if (isset($tag)) {
-            $exResult = Example::whereHas('tags', function ($query) use ($tag){
-                $query->where('name', 'like', '%'.$tag.'%');
-            })->pluck('meaning_id')->toArray();
-        
-            $meaning->whereIn('id',$exResult);
+            try {
+                $exResult = Example::whereHas('tags', function ($query) use ($tag){
+                    $query->where('name', 'like', '%'.$tag.'%');
+                })->pluck('meaning_id')->toArray();
+            
+                $meaning->whereIn('id',$exResult);
+                
+                if ($meaning->count() == 0) {
+                    return $this->success(null,'There no word with this tag.');
+                }
+            } catch (QueryException $th) {
+                return $this->error(null,$th->getMessage(),400);
+            }
         }
 
         if (isset($category)) {
-            $categoryResult = Category::where('name', 'like', '%'.$category.'%')->pluck('id')->toArray();
-            $tagResult = Tag::whereIn('category_id', $categoryResult)->pluck('id')->toArray();
+            try {
+                $categoryResult = Category::where('name', 'like', '%'.$category.'%')->pluck('id')->toArray();
+                $tagResult = Tag::whereIn('category_id', $categoryResult)->pluck('id')->toArray();
+                
+                $exampleResult = Example::with('tags')
+                ->whereHas('tags', function($q) use($tagResult) {
+                    $q->whereIn('tag_id', $tagResult);
+                })->pluck('meaning_id')->toArray();
+
+                $meaning->whereIn('id',$exampleResult);
+
+                if ($meaning->count() == 0) {
+                    return $this->success(null,'There no word with this category.');
+                }
+            } catch (QueryException $th) {
+                return $this->error(null,$th->getMessage(),400);
+            }
             
-            $exampleResult = Example::with('tags')
-            ->whereHas('tags', function($q) use($tagResult) {
-                $q->whereIn('tag_id', $tagResult);
-            })->pluck('meaning_id')->toArray();
-
-            // return $exampleResult;
-
-            $meaning->whereIn('id',$exampleResult);
         }
 
         if (isset($word)) {
-            $meaning->where('word','LIKE','%'.$word.'%')->orWhere('meaning','LIKE','%'.$word.'%');
+            try {
+                $meaning->where('word','LIKE','%'.$word.'%')->orWhere('meaning','LIKE','%'.$word.'%');
+                if ($meaning->count() == 0) {
+                    return $this->success(null,'Word not found.');
+                }
+            } catch (QueryException $th) {
+                return $this->error(null,$th->getMessage(),400);
+            }
         }
+
         return $meaning->with('examples','tags')->get();
     }
-    
 }
