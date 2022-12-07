@@ -94,16 +94,25 @@ class MeaningController extends Controller
         $meaning = Meaning::query();
 
         $word = $request->word;
-        $tag = $request->tag;
-        $category = $request->category;
+        $tags = $request->tags;
 
-        if (isset($tag)) {
+        if (isset($tags)) {
             try {
-                $exResult = Example::whereHas('tags', function ($query) use ($tag){
-                    $query->where('name', 'like', '%'.$tag.'%');
-                })->pluck('meaning_id')->toArray();
-            
-                $meaning->whereIn('id',$exResult);
+                $tagResult = Tag::whereIn('name',$tags)->pluck('id')->toArray();
+
+                $exResult = Example::whereHas('tags', function ($query) use ($tagResult){
+                    $query->whereIn('tag_id', $tagResult);
+                })->with('tags')->get();
+
+                foreach ($exResult as $key => $value) {
+                    if (count($value->tags) < count($tags)) {
+                        unset($exResult[$key]);
+                    }
+                }
+
+                $x = array_column($exResult->toArray(), 'meaning_id');
+
+                $meaning->whereIn('id',$x);
                 
                 if ($meaning->count() == 0) {
                     return $this->success(null,'There no word with this tag.');
@@ -111,27 +120,6 @@ class MeaningController extends Controller
             } catch (QueryException $th) {
                 return $this->error(null,$th->getMessage(),400);
             }
-        }
-
-        if (isset($category)) {
-            try {
-                $categoryResult = Category::where('name', 'like', '%'.$category.'%')->pluck('id')->toArray();
-                $tagResult = Tag::whereIn('category_id', $categoryResult)->pluck('id')->toArray();
-                
-                $exampleResult = Example::with('tags')
-                ->whereHas('tags', function($q) use($tagResult) {
-                    $q->whereIn('tag_id', $tagResult);
-                })->pluck('meaning_id')->toArray();
-
-                $meaning->whereIn('id',$exampleResult);
-
-                if ($meaning->count() == 0) {
-                    return $this->success(null,'There no word with this category.');
-                }
-            } catch (QueryException $th) {
-                return $this->error(null,$th->getMessage(),400);
-            }
-            
         }
 
         if (isset($word)) {

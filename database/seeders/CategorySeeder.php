@@ -15,8 +15,9 @@ class CategorySeeder extends Seeder
     public function run()
     {
         $categories = [
-        	['1','categories 1'],
-            ['2','categories 2'],
+        	['1','context'],
+            ['2','type'],
+            ['3','topic']
         ];
 
         foreach ($categories as $category) {

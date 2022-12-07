@@ -16,15 +16,15 @@ class ExampleTagSeeder extends Seeder
     {
         $examples = [
         	[1,1],
-            [2,1],
-            [3,2],
+            [2,2],
             [3,3],
-            [2,4],
-            [4,1],
-            [4,4],
-            [5,4],
-            [6,3],
-            [7,2]
+            [3,4],
+            [2,5],
+            [4,6],
+            [4,7],
+            [5,8],
+            [6,9],
+            [7,1]
         ];
 
         foreach ($examples as $example) {

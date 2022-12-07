@@ -15,10 +15,15 @@ class TagSeeder extends Seeder
     public function run()
     {
         $tags = [
-        	['1','1','tag 1'],
-            ['2','1','tag 2'],
-            ['3','2','tag 3'],
-            ['4','2', 'tag 4']
+        	['1','1','casual'],
+            ['2','1','formal'],
+            ['3','1','slang'],
+            ['4','1', '用語'],
+            ['5','2','Danh Từ'],
+            ['6','2','Động Từ'],
+            ['7','2','Tính Từ'],
+            ['8','3','IT'],
+            ['9','3','business']
         ];
 
         foreach ($tags as $tag) {
