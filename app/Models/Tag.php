@@ -23,4 +23,9 @@ class Tag extends Model
     {   
         return $this->belongsToMany(Example::class);
     }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }
