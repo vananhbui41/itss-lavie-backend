@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Traits\HttpResponses;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class CategoryController extends Controller
 {
+    use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -22,9 +27,16 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $category = ['name' => $request->category_name];
+
+        try {
+            $data = Category::create($category);
+            return $this->success($data, "Category created", 200);
+        } catch (QueryException $th) {
+            return $this->error(null,$th->getMessage(),200);
+        }
     }
 
     /**

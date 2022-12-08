@@ -24,6 +24,7 @@ Route::post('/login', [AuthController::class,'login']);
 Route::get('/search', [MeaningController::class,'search']);
 Route::get('categories', [CategoryController::class,'index']);
 Route::get('tags', [TagController::class,'index']);
+Route::post('categories', [CategoryController::class,'create']);
 
 // Protected route
 Route::middleware('auth:sanctum')->group(function () {
