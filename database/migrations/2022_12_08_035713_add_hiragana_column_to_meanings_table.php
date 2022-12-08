@@ -14,7 +14,7 @@ class AddHiraganaColumnToMeaningsTable extends Migration
     public function up()
     {
         Schema::table('meanings', function (Blueprint $table) {
-            $table->string('hiragana');
+            $table->string('hiragana')->nullable(true);
         });
     }
 
