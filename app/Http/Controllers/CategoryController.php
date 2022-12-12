@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
+    use HttpResponses;
     /**
      * Display a listing of the resource.
      *
@@ -93,6 +95,11 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            Category::destroy($id);
+            return $this->success(\null,'Category delete successful');
+        } catch (QueryException $th) {
+            return \response()->json($th->errorInfo);
+        }
     }
 }
