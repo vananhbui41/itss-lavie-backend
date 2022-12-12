@@ -19,9 +19,9 @@ class Tag extends Model
         'category_id'
     ];
 
-    public function examples()
+    public function meanings()
     {   
-        return $this->belongsToMany(Example::class);
+        return $this->belongsToMany(Meaning::class);
     }
 
     public function category()

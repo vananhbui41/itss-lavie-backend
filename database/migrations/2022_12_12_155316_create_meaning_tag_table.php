@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class DropExampleTable extends Migration
+class CreateMeaningTagTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,12 @@ class DropExampleTable extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('examples');
+        Schema::create('meaning_tag', function (Blueprint $table) {
+            $table->id();
+            $table->integer('meaning_id');
+            $table->integer('tag_id');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -23,12 +28,6 @@ class DropExampleTable extends Migration
      */
     public function down()
     {
-        Schema::create('examples', function (Blueprint $table) {
-            $table->id();
-            $table->integer('meaning_id');
-            $table->string('image');
-            $table->string('meaning');
-            $table->timestamps();
-        });
+        Schema::dropIfExists('meaning_tag');
     }
 }

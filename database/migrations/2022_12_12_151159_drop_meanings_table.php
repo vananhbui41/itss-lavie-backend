@@ -23,6 +23,13 @@ class DropMeaningsTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::create('meanings', function (Blueprint $table) {
+            $table->id();
+            $table->string('word');
+            $table->string('meaning');
+            $table->string('dongnghia');
+            $table->string('trainghia');
+            $table->timestamps();
+        });
     }
 }

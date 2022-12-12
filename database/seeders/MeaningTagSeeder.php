@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class ExampleTagSeeder extends Seeder
+class MeaningTagSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -24,12 +24,15 @@ class ExampleTagSeeder extends Seeder
             [4,7],
             [5,8],
             [6,9],
-            [7,1]
+            [7,1],
+            [8,3],
+            [9,2],
+            [10,1]
         ];
 
         foreach ($examples as $example) {
-            DB::table('example_tag')->insert([
-                'example_id' => $example[0],
+            DB::table('meaning_tag')->insert([
+                'meaning_id' => $example[0],
                 'tag_id' => $example[1]
             ]);
         }
