@@ -18,8 +18,9 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             TagSeeder::class,
             ExampleSeeder::class,
+            WordSeeder::class,
             MeaningSeeder::class,
-            ExampleTagSeeder::class,
+            MeaningTagSeeder::class,
         ]);
     }
 }

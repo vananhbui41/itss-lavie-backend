@@ -23,6 +23,11 @@ class DropExampleTagTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::create('example_tag', function (Blueprint $table) {
+            $table->id();
+            $table->integer('example_id');
+            $table->integer('tag_id');
+            $table->timestamps();
+        });
     }
 }

@@ -20,7 +20,7 @@ class CreateNewMeaningsTable extends Migration
             $table->string('explanation_of_meaning');
             $table->string('example');
             $table->string('example_meaning');
-            $table->string('image');
+            $table->string('image')->nullable('true');
             $table->timestamps();
         });
     }

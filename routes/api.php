@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MeaningController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\WordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +22,7 @@ use App\Http\Controllers\TagController;
 // Public Route
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
-Route::get('/search', [MeaningController::class,'search']);
+Route::get('/search', [WordController::class,'search']);
 Route::get('categories', [CategoryController::class,'index']);
 Route::get('tags', [TagController::class,'index']);
 
