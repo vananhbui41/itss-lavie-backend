@@ -24,6 +24,7 @@ Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
 Route::get('/search', [WordController::class,'search']);
 Route::get('categories', [CategoryController::class,'index']);
+Route::post('categories',[CategoryController::class,'create']);
 Route::get('tags', [TagController::class,'index']);
 
 // Protected route
