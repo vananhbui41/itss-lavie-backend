@@ -18,7 +18,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return Category::all();
+        $categories = Category::with('tags')->get();
+        return \response()->json($categories);
     }
 
     /**
