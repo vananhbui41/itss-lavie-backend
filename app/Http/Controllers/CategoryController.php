@@ -52,7 +52,8 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        //
+        $category = Category::with('tags')->where('id',$id)->get();
+        return \response()->json($category);
     }
 
     /**
