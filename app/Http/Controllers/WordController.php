@@ -96,11 +96,13 @@ class WordController extends Controller
 
         if (isset($keyword)) {
             try {
-                $query->whereRelation('meanings','meaning','LIKE','%'.$keyword.'%')
+                $query->where(function($q) use ($keyword) {
+                    $q->whereRelation('meanings','meaning','LIKE','%'.$keyword.'%')
                     ->orWhereRelation('meanings','example','LIKE','%'.$keyword.'%')
                     ->orWhereRelation('meanings','example_meaning','LIKE','%'.$keyword.'%')
                     ->orWhere('word','LIKE','%'.$keyword.'%')
                     ->orWhere('furigana','LIKE','%'.$keyword.'%');
+                });
                 if ($query->count() == 0) {
                     return $this->success(null,'Word not found.');
                 }
