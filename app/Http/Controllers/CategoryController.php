@@ -22,11 +22,12 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Store a newly created resource in storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), ['name' => 'required|unique:categories,name|max:255']);
         $data = $request->all();
@@ -36,21 +37,10 @@ class CategoryController extends Controller
         }
         try {
             $category = Category::create($data);
-            return \response()->json($category);
+            return $this->success($category, 'Category has been created successfully');
         } catch (QueryException $th) {
             return \response()->json($th->errorInfo);
         }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -65,17 +55,6 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -84,7 +63,15 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validator = Validator::make($request->all(), ['name' => 'required|unique:categories,name|max:255']);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $category = Category::find($id);
+        $category->update($request->all());
+        return $this->success($category,'Category has been updated successfully');
     }
 
     /**
