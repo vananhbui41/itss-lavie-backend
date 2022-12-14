@@ -16,10 +16,13 @@ class TagController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tags = Tag::with('category')->get();
-        return \response()->json($tags);
+        $tags = Tag::with('category');
+        if ($request->has('name')) {
+            $tags->where('name', $request->name);
+        }
+        return \response()->json($tags->get());
     }
 
     /**
@@ -67,7 +70,8 @@ class TagController extends Controller
      */
     public function show($id)
     {
-        $tag = Tag::with('category')->where('id',$id)->get();
+        $tag = Tag::findOrFail($id);
+        $tag->category;
         return \response()->json($tag);
     }
 
