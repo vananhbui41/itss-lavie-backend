@@ -6,6 +6,8 @@ use App\Models\Word;
 use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class WordController extends Controller
 {
@@ -123,6 +125,28 @@ class WordController extends Controller
                 return $this->error(null,$th->getMessage(),400);
             }
         }
-        return $query->get();      
+
+        $results = $query->get()->toArray();
+        foreach ($results as $key => $result) {
+            $relations = DB::table('word_relations')
+                ->where('word1_id', $result['id'])
+                ->get()
+                ->toArray();
+            $synonym = [];
+            $antonym = [];
+            foreach ($relations as $relation) {
+                if ($relation->relation_type == 1) {
+                    $synonym_word = Word::find($relation->word2_id)->toArray();
+                    \array_push($synonym, $synonym_word);
+                }
+                if ($relation->relation_type == 0) {
+                    $antonym_word = Word::find($relation->word2_id)->toArray();
+                    \array_push($antonym, $antonym_word);
+                }
+            }
+            $results[$key]['synonym'] = $synonym;
+            $results[$key]['antonym'] = $antonym;
+        }  
+        return \response()->json($results);
     }
 }
