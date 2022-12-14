@@ -26,6 +26,7 @@ Route::get('/search', [WordController::class,'search']);
 Route::resource('categories', CategoryController::class);
 Route::resource('tags', TagController::class);
 Route::resource('words', WordController::class);
+Route::resource('meanings', WordController::class);
 
 // Protected route
 Route::middleware('auth:sanctum')->group(function () {
