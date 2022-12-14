@@ -40,7 +40,12 @@ class TagController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), ['name' => 'required|unique:tags,name|max:255']);
+        $validator = Validator::make($request->all(),
+            [
+                'name' => 'required|unique:tags,name|max:255',
+                'category_id' => 'required|exists:categories,id'
+            ]
+        );
         $data = $request->all();
 
         if ($validator->fails()) {
@@ -86,7 +91,12 @@ class TagController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), ['name' => 'required|unique:tags,name|max:255']);
+        $validator = Validator::make($request->all(),
+            [
+                'name' => 'required|unique:tags,name|max:255',
+                'category_id' => 'exists:categories,id'
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
@@ -94,7 +104,7 @@ class TagController extends Controller
 
         $tag = Tag::find($id);
         $tag->update($request->all());
-        return $this->success($tag,'Tag has been updated successfully');
+        return $this->success($tag,'Tag has been updated');
     }
 
     /**
@@ -107,7 +117,7 @@ class TagController extends Controller
     {
         try {
             Tag::destroy($id);
-            return $this->success(\null,'Tag delete successful');
+            return $this->success(\null,'Tag deleted successful');
         } catch (QueryException $th) {
             return \response()->json($th->errorInfo);
         }
