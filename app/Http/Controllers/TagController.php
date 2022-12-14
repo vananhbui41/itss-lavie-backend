@@ -94,7 +94,7 @@ class TagController extends Controller
 
         $tag = Tag::find($id);
         $tag->update($request->all());
-        return $this->success($tag,'Tag has been updated successfully');
+        return $this->success($tag, 'Tag has been updated successfully');
     }
 
     /**
@@ -107,7 +107,7 @@ class TagController extends Controller
     {
         try {
             Tag::destroy($id);
-            return $this->success(\null,'Tag delete successful');
+            return $this->success(\null, 'Tag delete successful');
         } catch (QueryException $th) {
             return \response()->json($th->errorInfo);
         }

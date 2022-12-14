@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Word;
+use App\Models\Meaning;
+use App\Models\MeaningTag;
 use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -19,7 +21,8 @@ class WordController extends Controller
      */
     public function index()
     {
-        //
+        $words = Word::all();
+        return \response()->json($words);
     }
 
     /**
@@ -40,14 +43,40 @@ class WordController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), ['name' => 'required|unique:words,name|max:255']);
-        $data = $request->all();
+        $validator = Validator::make($request->all(), ['word' => 'required|unique:words,word|max:255']);
+        $data = array(
+            "word" => $request->word,
+            "furigana" => $request->furigana
+        );
 
+        $arr_meanings = $request->meanings;
+        
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
         try {
             $word = Word::create($data);
+
+            foreach($arr_meanings as $x){
+            
+                $data_meaning = array(
+                    "word_id"=> $word->id,
+                    "meaning"=> $x["meaning"],
+                    "explanation_of_meaning"=> $x["explanation_of_meaning"],
+                    "example"=> $x["example"],
+                    "example_meaning"=> $x["example_meaning"],
+                    "image"=> $x["image"]
+                );
+                $meaning = Meaning::create($data_meaning);
+
+                foreach($x["tags_id"] as $tag_id){
+                    $tm = array(
+                        "tag_id"=> $tag_id,
+                        "meaning_id"=> $meaning->id
+                    );
+                    $meaningtag = MeaningTag::create($tm);
+                }
+            }
             return $this->success($word, 'Word has been created successfully');
         } catch (QueryException $th) {
             return \response()->json($th->errorInfo);
@@ -62,7 +91,7 @@ class WordController extends Controller
      */
     public function show($id)
     {
-        $words = Word::with('tags')->get();
+        $words = Word::find($id);
         return \response()->json($words);
     }
 
@@ -86,15 +115,53 @@ class WordController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), ['name' => 'required|unique:words,name|max:255']);
+        $validator = Validator::make($request->all(), ['word|max:255']);
+        $data = array(
+            "word" => $request->word,
+            "furigana" => $request->furigana
+        );
 
+        $arr_meanings = $request->meanings;
+        
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+        try {
+            $word = Word::find($id);
+            $word->update($data);
 
-        $word = Word::find($id);
-        $word->update($request->all());
-        return $this->success($word,'Word has been updated successfully');
+            // Delete old data related
+            $meaning = Meaning::where('word_id',$id)->get();
+            foreach($meaning as $m){
+                $meaningtag = MeaningTag::where('meaning_id', $m["id"])->delete();
+            }
+            Meaning::where('word_id',$id)->delete();
+
+            // Create new data related
+            foreach($arr_meanings as $x){
+            
+                $data_meaning = array(
+                    "word_id"=> $id,
+                    "meaning"=> $x["meaning"],
+                    "explanation_of_meaning"=> $x["explanation_of_meaning"],
+                    "example"=> $x["example"],
+                    "example_meaning"=> $x["example_meaning"],
+                    "image"=> $x["image"]
+                );
+                $meaning = Meaning::create($data_meaning);
+
+                foreach($x["tags_id"] as $tag_id){
+                    $tm = array(
+                        "tag_id"=> $tag_id,
+                        "meaning_id"=> $meaning->id
+                    );
+                    $meaningtag = MeaningTag::create($tm);
+                }
+            }
+            return $this->success($word, 'Word has been created successfully');
+        } catch (QueryException $th) {
+            return \response()->json($th->errorInfo);
+        }
     }
 
     /**
@@ -107,6 +174,11 @@ class WordController extends Controller
     {
         try {
             Word::destroy($id);
+            $meaning = Meaning::where('word_id',$id)->get();
+            foreach($meaning as $m){
+                $meaningtag = MeaningTag::where('meaning_id', $m["id"])->delete();
+            }
+            Meaning::where('word_id',$id)->delete();
             return $this->success(\null,'Word delete successful');
         } catch (QueryException $th) {
             return \response()->json($th->errorInfo);
