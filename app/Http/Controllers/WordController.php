@@ -6,6 +6,7 @@ use App\Models\Word;
 use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class WordController extends Controller
 {
@@ -39,7 +40,18 @@ class WordController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), ['name' => 'required|unique:words,name|max:255']);
+        $data = $request->all();
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+        try {
+            $word = Word::create($data);
+            return $this->success($word, 'Word has been created successfully');
+        } catch (QueryException $th) {
+            return \response()->json($th->errorInfo);
+        }
     }
 
     /**
@@ -50,7 +62,8 @@ class WordController extends Controller
      */
     public function show($id)
     {
-        //
+        $words = Word::with('tags')->get();
+        return \response()->json($words);
     }
 
     /**
@@ -73,7 +86,15 @@ class WordController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validator = Validator::make($request->all(), ['name' => 'required|unique:words,name|max:255']);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $word = Word::find($id);
+        $word->update($request->all());
+        return $this->success($word,'Word has been updated successfully');
     }
 
     /**
@@ -84,7 +105,12 @@ class WordController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            Word::destroy($id);
+            return $this->success(\null,'Word delete successful');
+        } catch (QueryException $th) {
+            return \response()->json($th->errorInfo);
+        }
     }
 
     public function search(Request $request)
