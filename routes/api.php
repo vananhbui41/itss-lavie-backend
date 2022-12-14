@@ -24,7 +24,9 @@ Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
 Route::get('/search', [WordController::class,'search']);
 Route::resource('categories', CategoryController::class);
-Route::get('tags', [TagController::class,'index']);
+Route::resource('tags', TagController::class);
+Route::resource('words', WordController::class);
+Route::resource('meanings', WordController::class);
 
 // Protected route
 Route::middleware('auth:sanctum')->group(function () {
