@@ -16,10 +16,13 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::with('tags')->get();
-        return \response()->json($categories);
+        $categories = Category::with('tags');
+        if ($request->has("name")) {
+            $categories->where('name', 'like', '%'.$request->name.'%');
+        }
+        return \response()->json($categories->get());
     }
 
     /**
@@ -52,7 +55,8 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $category = Category::with('tags')->where('id',$id)->get();
+        $category = Category::findOrFail($id);
+        $category->tags;
         return \response()->json($category);
     }
 

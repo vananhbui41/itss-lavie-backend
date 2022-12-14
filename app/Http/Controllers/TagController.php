@@ -20,7 +20,7 @@ class TagController extends Controller
     {
         $tags = Tag::with('category');
         if ($request->has('name')) {
-            $tags->where('name', $request->name);
+            $tags->where('name', 'like', '%'.$request->name.'%');
         }
         return \response()->json($tags->get());
     }
