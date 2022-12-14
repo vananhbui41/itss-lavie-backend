@@ -93,7 +93,7 @@ class TagController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'name' => 'required|unique:tags,name|max:255',
+                'name' => 'unique:tags,name|max:255',
                 'category_id' => 'exists:categories,id'
             ]
         );
