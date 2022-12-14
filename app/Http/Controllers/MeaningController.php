@@ -7,6 +7,7 @@ use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\ImageResource;
 
 class MeaningController extends Controller
 {
@@ -38,18 +39,33 @@ class MeaningController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), ['meaning' => 'required|unique:meanings,meaning|max:255']);
-        $data = $request->all();
+        $this->validate($request, [
+            'image' => 'required|mimes:pdf,png,jpg|max:9999'
+        ]);
+        
+        $base_location = 'meaning_images';
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // Handle File Upload
+        if($request->hasFile('image')) {              
+            //Using store(), the filename will be hashed. You can use storeAs() to specify a name.
+            //To specify the file visibility setting, you can update the config/filesystems.php s3 disk visibility key,
+            //or you can specify the visibility of the file in the second parameter of the store() method like:
+            //$imagePath = $request->file('image')->store($base_location, ['disk' => 's3', 'visibility' => 'public']);
+            
+            $imagePath = $request->file('image')->store($base_location, 's3');
+          
+        } else {
+            return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
         }
-        try {
-            $meaning = Meaning::create($data);
-            return $this->success($meaning, 'Meaning has been created successfully');
-        } catch (QueryException $th) {
-            return \response()->json($th->errorInfo);
-        }
+    
+        return \response()->json($imagePath);
+        //We save new path
+        $meaning = new Meaning();
+        $meaning->image = $imagePath;
+        $meaning->meaning = $request->meaning;
+        $meaning->save();
+       
+        return response()->json(['success' => true, 'message' => 'image successfully uploaded', 'meaning' => new ImageResource($meaning)], 200);
     }
 
     /**
@@ -62,6 +78,7 @@ class MeaningController extends Controller
     {
         $meanings = Meaning::with('tags')->get();
         return \response()->json($meanings);
+        
     }
 
     /**
