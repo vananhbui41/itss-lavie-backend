@@ -149,10 +149,7 @@ class WordController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), ['word|max:255']);
-        $data = array(
-            "word" => $request->word,
-            "furigana" => $request->furigana
-        );
+        $data = $request->all();
 
         $arr_meanings = $request->meanings;
         
@@ -161,8 +158,8 @@ class WordController extends Controller
         }
         DB::beginTransaction();
         try {
-            $word = Word::find($id);
-            $word->update($data);
+            $wordUpdate = Word::find($id);
+            $wordUpdate->update($data);
 
             if (isset($arr_meanings)) {
                 // Delete old data related
@@ -170,23 +167,19 @@ class WordController extends Controller
                 foreach($meaning as $m){
                     $m->tags()->detach();
                 }
-                Meaning::where('word_id',$id)->delete();
 
                 // Create new data related
                 foreach($arr_meanings as $x){
-                
-                    $data_meaning = array(
-                        "word_id"=> $id,
-                        "meaning"=> $x["meaning"],
-                        "explanation_of_meaning"=> $x["explanation_of_meaning"],
-                        "example"=> $x["example"],
-                        "example_meaning"=> $x["example_meaning"],
-                        "image"=> $x["image"]
-                    );
-                    $meaning = Meaning::create($data_meaning);
-
-                    foreach($x["tags_id"] as $tag_id){
-                        $meaning->tags()->attach($tag_id);
+                    $x['word_id'] = $wordUpdate->id;
+                    if (isset($x['id'])) {
+                        $meaning = Meaning::findOrFail($id)->updated($x);
+                    } else {
+                        $meaning = Meaning::create($x);
+                    }
+                    if (isset($x['tags_id'])) {
+                        foreach($x["tags_id"] as $tag_id){
+                            $meaning->tags()->attach($tag_id);
+                        }
                     }
                 }
             }
@@ -196,7 +189,7 @@ class WordController extends Controller
                     $word2_id = Word::where('word', $value)->first()->id;
                     DB::table('word_relations')
                         ->updateOrInsert([
-                            'word1_id' => $word->id,
+                            'word1_id' => $wordUpdate->id,
                             'word2_id' => $word2_id,
                             'relation_type' => 1
                         ]);
@@ -207,14 +200,14 @@ class WordController extends Controller
                     $word2_id = Word::where('word', $value)->first()->id;
                     DB::table('word_relations')
                         ->updateOrInsert([
-                            'word1_id' => $word->id,
+                            'word1_id' => $wordUpdate->id,
                             'word2_id' => $word2_id,
                             'relation_type' => 0
                         ]);
                 }
             }
             DB::commit();
-            return $this->success($word, 'Word has been updated successfully');
+            return $this->success($wordUpdate->with('meanings')->get(), 'Word has been updated successfully');
         } catch (QueryException $th) {
             DB::rollBack();
             return \response()->json($th->errorInfo);
