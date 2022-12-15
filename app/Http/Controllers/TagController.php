@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Tag;
 use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
@@ -21,6 +22,10 @@ class TagController extends Controller
         $tags = Tag::with('category');
         if ($request->has('name')) {
             $tags->where('name', 'like', '%'.$request->name.'%');
+        }
+        if ($request->has('category')) {
+            $category = Category::where('name', $request->category)->first();
+            $tags->whereBelongsTo($category);
         }
         return \response()->json($tags->get());
     }
