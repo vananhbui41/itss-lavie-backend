@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Word;
 use App\Models\Meaning;
 use App\Models\MeaningTag;
@@ -23,17 +24,17 @@ class WordController extends Controller
     public function index()
     {
         $words = Word::all();
+        foreach ($words as $word) {
+            $categories = $word->tags()->distinct()->get()->groupBy('category_id');
+            foreach ($categories as $key => $category) {
+                $category_name = Category::find($key)->name;
+                $categories[$category_name] = $categories[$key];
+                unset($categories[$key]);
+            }
+            $word->toArray();
+            $word['categories'] = $categories;
+        }
         return \response()->json($words);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -51,35 +52,47 @@ class WordController extends Controller
         );
 
         $arr_meanings = $request->meanings;
+        $synonym = $request->synonym;
+        $antonym = $request->antonym;
         
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+        DB::beginTransaction();
         try {
             $word = Word::create($data);
 
-            foreach($arr_meanings as $x){
-            
-                $data_meaning = array(
-                    "word_id"=> $word->id,
-                    "meaning"=> $x["meaning"],
-                    "explanation_of_meaning"=> $x["explanation_of_meaning"],
-                    "example"=> $x["example"],
-                    "example_meaning"=> $x["example_meaning"],
-                    "image"=> $x["image"]
-                );
-                $meaning = Meaning::create($data_meaning);
-
-                foreach($x["tags_id"] as $tag_id){
-                    $tm = array(
-                        "tag_id"=> $tag_id,
-                        "meaning_id"=> $meaning->id
+            if (isset($arr_meanings)) {
+                foreach($arr_meanings as $x){
+                    $data_meaning = array(
+                        "word_id" => $word->id,
+                        "meaning" => $x["meaning"],
+                        "explanation_of_meaning" => $x["explanation_of_meaning"],
+                        "example" => $x["example"],
+                        "example_meaning" => $x["example_meaning"],
+                        "image" => $x["image"]
                     );
-                    $meaningtag = MeaningTag::create($tm);
+                    $meaning = Meaning::create($data_meaning);
+                    foreach($x["tags_id"] as $tag_id){
+                        $meaning->tags()->attach($tag_id);
+                    }
                 }
             }
+            if (isset($synonym)) {
+                foreach ($synonym as $value) {
+                    $word2_id = Word::where('word', $value)->first()->id;
+                    DB::table('word_relations')
+                        ->updateOrInsert([
+                            'word1_id' => $word->id,
+                            'word2_id' => $word2_id,
+                            'relation_type' => 1
+                        ]);
+                }
+            }
+            DB::commit();
             return $this->success($word, 'Word has been created successfully');
         } catch (QueryException $th) {
+            DB::rollBack();
             return \response()->json($th->errorInfo);
         }
     }
@@ -92,8 +105,15 @@ class WordController extends Controller
      */
     public function show($id)
     {
-        $words = Word::find($id);
-        return \response()->json($words);
+        $word = Word::findOrFail($id);
+        $meanings = $word->meanings;
+        foreach ($meanings as $meaning) {
+            $tags = $meaning->tags;
+            foreach ($tags as $tag) {
+                $tag->category;
+            }
+        }
+        return \response()->json($word);
     }
 
     /**

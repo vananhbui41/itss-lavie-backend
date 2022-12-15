@@ -19,6 +19,7 @@ class Meaning extends Model
         'meaning',
         'explanation_of_meaning',
         'example',
+        'example_meaning',
         'image'
     ];
 
