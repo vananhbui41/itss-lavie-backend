@@ -38,18 +38,7 @@ class MeaningController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), ['meaning' => 'required|unique:meanings,meaning|max:255']);
-        $data = $request->all();
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-        try {
-            $meaning = Meaning::create($data);
-            return $this->success($meaning, 'Meaning has been created successfully');
-        } catch (QueryException $th) {
-            return \response()->json($th->errorInfo);
-        }
+        //
     }
 
     /**
@@ -84,15 +73,7 @@ class MeaningController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), ['meaning' => 'required|unique:meanings,meaning|max:255']);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        $meaning = Meaning::find($id);
-        $meaning->update($request->all());
-        return $this->success($meaning,'Meaning has been updated successfully');
+        
     }
 
     /**
@@ -103,11 +84,6 @@ class MeaningController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            Meaning::destroy($id);
-            return $this->success(\null,'Meaing delete successful');
-        } catch (QueryException $th) {
-            return \response()->json($th->errorInfo);
-        }
+        //
     }
 }
