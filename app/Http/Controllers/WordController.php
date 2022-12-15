@@ -152,9 +152,9 @@ class WordController extends Controller
             $word->update($data);
 
             // Delete old data related
-            $meaning = Meaning::where('word_id',$id)->get();
+            $meaning = Meaning::where('word_id',$id);
             foreach($meaning as $m){
-                $meaningtag = MeaningTag::where('meaning_id', $m["id"])->delete();
+                $m->tags()->detach();
             }
             Meaning::where('word_id',$id)->delete();
 
@@ -172,14 +172,10 @@ class WordController extends Controller
                 $meaning = Meaning::create($data_meaning);
 
                 foreach($x["tags_id"] as $tag_id){
-                    $tm = array(
-                        "tag_id"=> $tag_id,
-                        "meaning_id"=> $meaning->id
-                    );
-                    $meaningtag = MeaningTag::create($tm);
+                    $meaning->tags()->attach($tag_id);
                 }
             }
-            return $this->success($word, 'Word has been created successfully');
+            return $this->success($word, 'Word has been updated successfully');
         } catch (QueryException $th) {
             return \response()->json($th->errorInfo);
         }
@@ -197,7 +193,7 @@ class WordController extends Controller
             Word::destroy($id);
             $meaning = Meaning::where('word_id',$id)->get();
             foreach($meaning as $m){
-                $meaningtag = MeaningTag::where('meaning_id', $m["id"])->delete();
+                $m->tags()->detach();
             }
             Meaning::where('word_id',$id)->delete();
             return $this->success(\null,'Word delete successful');
