@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Traits\HttpResponses;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,24 +22,25 @@ class TagController extends Controller
     public function index(Request $request)
     {
         $tags = Tag::with('category');
+
         if ($request->has('name')) {
-            $tags->where('name', 'like', '%'.$request->name.'%');
+            try {
+                $tags->where('name', 'like', '%'.$request->name.'%');
+                if ($tags->count() == 0) {
+                    return $this->error(null, "Tag with the name not found", 200);
+                }
+            } catch (Exception $th) {
+                return $this->error(null, $th->getMessage(),200);
+            }
+
         }
+
         if ($request->has('category')) {
             $category = Category::where('name', $request->category)->first();
             $tags->whereBelongsTo($category);
         }
-        return \response()->json($tags->get());
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return \response()->json($tags->get());
     }
 
     /**
@@ -57,7 +60,7 @@ class TagController extends Controller
         $data = $request->all();
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return $this->error(null, $validator->errors(), 422);
         }
         try {
             $tag = Tag::create($data);
@@ -75,20 +78,13 @@ class TagController extends Controller
      */
     public function show($id)
     {
-        $tag = Tag::findOrFail($id);
+        try {
+            $tag = Tag::findOrFail($id);
+        } catch (ModelNotFoundException $th) {
+            return $this->error(null, "Tag not found", 404);
+        }
         $tag->category;
         return \response()->json($tag);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
     }
 
     /**
@@ -108,11 +104,20 @@ class TagController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return $this->error(null, $validator->errors(), 422);
         }
 
-        $tag = Tag::find($id);
-        $tag->update($request->all());
+        try {
+            $tag = Tag::findOrFail($id);
+        } catch (ModelNotFoundException $th) {
+            return $this->error(null, "Tag not found", 404);
+        }
+
+        try {
+            $tag->update($request->all());
+        } catch (QueryException $th) {
+            return $this->error(null, $th->getMessage(), 200);
+        }
         return $this->success($tag,'Tag has been updated');
     }
 
@@ -128,7 +133,7 @@ class TagController extends Controller
             Tag::destroy($id);
             return $this->success(\null,'Tag deleted successful');
         } catch (QueryException $th) {
-            return \response()->json($th->errorInfo);
+            return $this->error(null, $th->getMessage(), 200);
         }
     }
 }
