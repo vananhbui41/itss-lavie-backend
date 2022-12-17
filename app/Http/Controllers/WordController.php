@@ -45,11 +45,11 @@ class WordController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), ['word' => 'required|unique:words,word|max:255']);
-        $data = array(
-            "word" => $request->word,
-            "furigana" => $request->furigana
-        );
+        $validator = Validator::make($request->all(), [
+            'word' => 'required|unique:words,word|max:255',
+            'meanings.*.tags_id' => 'required'
+        ]);
+        $data = $request->all();
 
         $arr_meanings = $request->meanings;
         $synonym = $request->synonym;
@@ -64,16 +64,18 @@ class WordController extends Controller
 
             if (isset($arr_meanings)) {
                 foreach($arr_meanings as $x){
-                    $data_meaning = array(
-                        "word_id" => $word->id,
-                        "meaning" => $x["meaning"],
-                        "explanation_of_meaning" => $x["explanation_of_meaning"],
-                        "example" => $x["example"],
-                        "example_meaning" => $x["example_meaning"],
-                        "image" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU"
-                        // "image" => $x["image"]
-                    );
-                    $meaning = Meaning::create($data_meaning);
+                    // $data_meaning = array(
+                    //     "word_id" => $word->id,
+                    //     "meaning" => $x["meaning"],
+                    //     "explanation_of_meaning" => $x["explanation_of_meaning"],
+                    //     "example" => $x["example"],
+                    //     "example_meaning" => $x["example_meaning"],
+                    //     "image" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU"
+                    //     // "image" => $x["image"]
+                    // );
+                    $x['word_id'] = $word->id;
+                    $x['image'] = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU';
+                    $meaning = Meaning::create($x);
                     foreach($x["tags_id"] as $tag_id){
                         $meaning->tags()->attach($tag_id);
                     }
