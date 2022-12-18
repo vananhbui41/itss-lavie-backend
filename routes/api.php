@@ -4,8 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MeaningController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WordController;
 
 /*
@@ -33,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('test',  function () {
         echo "Oke";
     });
+    Route::get('/histories',[UserController::class,'getHistories']);
+    Route::delete('histories/{id}', [UserController::class,'destroyHistory']);
 });
 
 Route::get('view', function () {

@@ -41,4 +41,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function words()
+    {
+        return $this->belongsToMany(Word::class, 'histories', 'user_id', 'word_id')->withTimestamps();        ;
+    }
 }

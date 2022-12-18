@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Word;
 use App\Models\Meaning;
-use App\Models\MeaningTag;
 use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class WordController extends Controller
 {
@@ -64,15 +64,6 @@ class WordController extends Controller
 
             if (isset($arr_meanings)) {
                 foreach($arr_meanings as $x){
-                    // $data_meaning = array(
-                    //     "word_id" => $word->id,
-                    //     "meaning" => $x["meaning"],
-                    //     "explanation_of_meaning" => $x["explanation_of_meaning"],
-                    //     "example" => $x["example"],
-                    //     "example_meaning" => $x["example_meaning"],
-                    //     "image" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU"
-                    //     // "image" => $x["image"]
-                    // );
                     $x['word_id'] = $word->id;
                     $x['image'] = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU';
                     $meaning = Meaning::create($x);
@@ -273,7 +264,13 @@ class WordController extends Controller
                 return $this->error(null,$th->getMessage(),400);
             }
         }
-
+ 
+        if ($request->header('Authorization')) {
+            $user = auth('sanctum')->user();
+            $word_ids = $query->pluck('id')->toArray();
+            $user->words()->sync($word_ids);
+        }
+        
         $results = $query->get()->toArray();
         foreach ($results as $key => $result) {
             $relations = DB::table('word_relations')
@@ -294,7 +291,7 @@ class WordController extends Controller
             }
             $results[$key]['synonym'] = $synonym;
             $results[$key]['antonym'] = $antonym;
-        }  
+        } 
         return \response()->json($results);
     }
 }
