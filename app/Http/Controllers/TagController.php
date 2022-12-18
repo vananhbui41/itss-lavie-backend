@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Meaning;
 use App\Models\Tag;
 use App\Traits\HttpResponses;
 use Exception;
@@ -130,6 +131,8 @@ class TagController extends Controller
     public function destroy($id)
     {
         try {
+            $tag = Tag::find($id);
+            $tag->meanings()->sync([]);
             Tag::destroy($id);
             return $this->success(\null,'Tag deleted successful');
         } catch (QueryException $th) {

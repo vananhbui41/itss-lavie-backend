@@ -268,7 +268,7 @@ class WordController extends Controller
         if ($request->header('Authorization')) {
             $user = auth('sanctum')->user();
             $word_ids = $query->pluck('id')->toArray();
-            $user->words()->sync($word_ids);
+            $user->words()->syncWithoutDetaching($word_ids);
         }
         
         $results = $query->get()->toArray();
