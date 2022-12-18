@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Traits\HttpResponses;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,8 +18,20 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        return $user->words;
+        $words = $user->words;
         
+        foreach ($words as $word) {
+            $categories = $word->tags()->distinct()->get()->groupBy('category_id');
+            foreach ($categories as $key => $category) {
+                $category_name = Category::find($key)->name;
+                $categories[$category_name] = $categories[$key];
+                unset($categories[$key]);
+            }
+            $word->toArray();
+            $word['categories'] = $categories;
+        }
+        
+        return \response()->json($words);
     }
 
     /**
