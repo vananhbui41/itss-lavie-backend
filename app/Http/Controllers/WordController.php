@@ -198,12 +198,13 @@ class WordController extends Controller
                 foreach($arr_meanings as $x){
                     $x['word_id'] = $wordUpdate->id;
                     if (isset($x['id'])) {
-                        $meaning = Meaning::findOrFail($id)->updated($x);
+                        $meaning = Meaning::findOrFail($x['id']);
+                        $meaning->update($x);
                     } else {
                         $meaning = Meaning::create($x);
                     }
                     if (isset($x['tags_id'])) {
-                        foreach($x["tags_id"] as $tag_id){
+                        foreach($x['tags_id'] as $tag_id){
                             $meaning->tags()->attach($tag_id);
                         }
                     }
