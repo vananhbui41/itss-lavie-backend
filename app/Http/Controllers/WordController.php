@@ -92,6 +92,7 @@ class WordController extends Controller
 
             if (isset($arr_meanings)) {
                 foreach($arr_meanings as $x){
+                    $x['image'] = !empty($x['image']) ? $x['image'] : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU';
                     $x['word_id'] = $word->id;
                     $meaning = Meaning::create($x);
                     foreach($x["tags_id"] as $tag_id){
@@ -196,6 +197,7 @@ class WordController extends Controller
 
                 // Create new data related
                 foreach($arr_meanings as $x){
+                    $x['image'] = !empty($x['image']) ? $x['image'] : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU';
                     $x['word_id'] = $wordUpdate->id;
                     if (isset($x['id'])) {
                         $meaning = Meaning::findOrFail($x['id']);
@@ -320,6 +322,7 @@ class WordController extends Controller
                 ->toArray();
             $synonym = [];
             $antonym = [];
+            
             foreach ($relations as $relation) {
                 if ($relation->relation_type == 1) {
                     $synonym_word = Word::find($relation->word2_id)->toArray();
