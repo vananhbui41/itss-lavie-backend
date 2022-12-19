@@ -21,9 +21,37 @@ class WordController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $words = Word::all();
+        $words = Word::query();
+        $keyword = $request->keyword;
+        $tags = $request->tags;
+
+        if (isset($keyword)) {
+            try {
+                $words->where('word','LIKE','%'.$keyword.'%');
+                if ($words->count() == 0) {
+                    return $this->success(null,'Word not found.');
+                }
+            } catch (QueryException $th) {
+                return $this->error(null,$th->getMessage(),400);
+            }
+        }
+
+        if (isset($tags)) {
+            try {
+                foreach ($tags as $tag) {
+                    $words->whereRelation('tags','name',$tag);
+                }
+                if ($words->count() == 0) {
+                    return $this->success(null,'There no word with those tags.');
+                }
+            } catch (QueryException $th) {
+                return $this->error(null,$th->getMessage(),400);
+            }
+        }
+        
+        $words = $words->get();
         foreach ($words as $word) {
             $categories = $word->tags()->distinct()->get()->groupBy('category_id');
             foreach ($categories as $key => $category) {
