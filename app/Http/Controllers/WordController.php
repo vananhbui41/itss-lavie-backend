@@ -184,7 +184,7 @@ class WordController extends Controller
         }
         DB::beginTransaction();
         try {
-            $wordUpdate = Word::find($id);
+            $wordUpdate = Word::findOrFail($id);
             $wordUpdate->update($data);
 
             if (isset($arr_meanings)) {
@@ -240,7 +240,8 @@ class WordController extends Controller
                 }
             }
             DB::commit();
-            return $this->success($wordUpdate->with('meanings')->get(), 'Word has been updated successfully');
+            $wordUpdate->meanings;
+            return $this->success($wordUpdate, 'Word has been updated successfully');
         } catch (QueryException $th) {
             DB::rollBack();
             return \response()->json($th->errorInfo);
