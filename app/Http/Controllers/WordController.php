@@ -65,7 +65,6 @@ class WordController extends Controller
             if (isset($arr_meanings)) {
                 foreach($arr_meanings as $x){
                     $x['word_id'] = $word->id;
-                    $x['image'] = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU';
                     $meaning = Meaning::create($x);
                     foreach($x["tags_id"] as $tag_id){
                         $meaning->tags()->attach($tag_id);
@@ -74,22 +73,28 @@ class WordController extends Controller
             }
             if (isset($synonym)) {
                 foreach ($synonym as $value) {
-                    $word2_id = Word::where('word', $value)->first()->id;
+                    $word2_id = Word::where('word', $value)->first();
+                    if ($word2_id == null) {
+                        return $this->error(null, 'Related word: '. $value . ' Not found', 200);
+                    }
                     DB::table('word_relations')
                         ->updateOrInsert([
                             'word1_id' => $word->id,
-                            'word2_id' => $word2_id,
+                            'word2_id' => $word2_id->id,
                             'relation_type' => 1
                         ]);
                 }
             }
             if (isset($antonym)) {
                 foreach ($antonym as $value) {
-                    $word2_id = Word::where('word', $value)->first()->id;
+                    $word2_id = Word::where('word', $value)->first();
+                    if ($word2_id == null) {
+                        return $this->error(null, 'Related word: '. $value . ' Not found', 200);
+                    }
                     DB::table('word_relations')
                         ->updateOrInsert([
                             'word1_id' => $word->id,
-                            'word2_id' => $word2_id,
+                            'word2_id' => $word2_id->id,
                             'relation_type' => 0
                         ]);
                 }
@@ -179,7 +184,10 @@ class WordController extends Controller
 
             if (isset($synonym)) {
                 foreach ($synonym as $value) {
-                    $word2_id = Word::where('word', $value)->first()->id;
+                    $word2_id = Word::where('word', $value)->first();
+                    if ($word2_id == null) {
+                        return $this->error(null, 'Related word: '.  $value . ' Not found', 200);
+                    }
                     DB::table('word_relations')
                         ->updateOrInsert([
                             'word1_id' => $wordUpdate->id,
@@ -190,7 +198,10 @@ class WordController extends Controller
             }
             if (isset($antonym)) {
                 foreach ($antonym as $value) {
-                    $word2_id = Word::where('word', $value)->first()->id;
+                    $word2_id = Word::where('word', $value)->first();
+                    if ($word2_id == null) {
+                        return $this->error(null, 'Related word: '. $value . ' Not found', 200);
+                    }
                     DB::table('word_relations')
                         ->updateOrInsert([
                             'word1_id' => $wordUpdate->id,
