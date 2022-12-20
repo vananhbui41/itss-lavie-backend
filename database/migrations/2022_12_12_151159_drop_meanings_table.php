@@ -29,6 +29,7 @@ class DropMeaningsTable extends Migration
             $table->string('meaning');
             $table->string('dongnghia');
             $table->string('trainghia');
+            $table->string('hiragana');
             $table->timestamps();
         });
     }
