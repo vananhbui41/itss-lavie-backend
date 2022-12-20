@@ -260,6 +260,7 @@ class WordController extends Controller
     {
         try {
             Word::destroy($id);
+            DB::table('word_relations')->where('word1_id', $id)->orWhere('word2_id',$id)->delete();
             $meaning = Meaning::where('word_id',$id)->get();
             foreach($meaning as $m){
                 $m->tags()->detach();
