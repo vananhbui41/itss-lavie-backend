@@ -99,7 +99,7 @@ class TagController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'name' => 'unique:tags,name|max:255',
+                'name' => 'unique:tags,name,'.$id.'|max:255',
                 'category_id' => 'exists:categories,id'
             ]
         );
@@ -107,7 +107,6 @@ class TagController extends Controller
         if ($validator->fails()) {
             return $this->error(null, $validator->errors(), 422);
         }
-
         try {
             $tag = Tag::findOrFail($id);
         } catch (ModelNotFoundException $th) {
