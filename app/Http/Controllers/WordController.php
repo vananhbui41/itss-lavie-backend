@@ -23,7 +23,7 @@ class WordController extends Controller
      */
     public function index(Request $request)
     {
-        $words = Word::query();
+        $words = Word::query()->orderBy('id', 'asc');
         $keyword = $request->keyword;
         $tags = $request->tags;
 
@@ -172,7 +172,7 @@ class WordController extends Controller
 
         $word['synonym'] = $synonym;
         $word['antonym'] = $antonym;
-        
+
         return \response()->json($word);
     }
 
