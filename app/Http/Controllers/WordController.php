@@ -152,6 +152,27 @@ class WordController extends Controller
                 $tag->category;
             }
         }
+        $relations = DB::table('word_relations')
+            ->where('word1_id', $id)
+            ->get()
+            ->toArray();
+        $synonym = [];
+        $antonym = [];
+        
+        foreach ($relations as $relation) {
+            if ($relation->relation_type == 1) {
+                $synonym_word = Word::find($relation->word2_id)->toArray();
+                \array_push($synonym, $synonym_word);
+            }
+            if ($relation->relation_type == 0) {
+                $antonym_word = Word::find($relation->word2_id)->toArray();
+                \array_push($antonym, $antonym_word);
+            }
+        }
+
+        $word['synonym'] = $synonym;
+        $word['antonym'] = $antonym;
+        
         return \response()->json($word);
     }
 
