@@ -22,7 +22,7 @@ class TagController extends Controller
      */
     public function index(Request $request)
     {
-        $tags = Tag::with('category');
+        $tags = Tag::with('category')->orderBy('id');
 
         if ($request->has('name')) {
             try {

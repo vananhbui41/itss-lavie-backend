@@ -18,7 +18,7 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = Category::with('tags');
+        $categories = Category::with('tags')->orderBy('id');
         if ($request->has("name")) {
             $categories->where('name', 'like', '%'.$request->name.'%');
         }
