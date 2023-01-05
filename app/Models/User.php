@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Word::class, 'histories', 'user_id', 'word_id')->withTimestamps();        ;
     }
+
+    public function providers()
+    {
+        return $this->hasMany(Provider::class,'user_id','id');
+    }
 }
