@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MeaningController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WordController;
@@ -28,6 +29,7 @@ Route::get('/search', [WordController::class,'search']);
 Route::resource('categories', CategoryController::class);
 Route::resource('tags', TagController::class);
 Route::resource('words', WordController::class);
+Route::resource('requests', RequestController::class);
 
 // Protected route
 Route::middleware('auth:sanctum')->group(function () {
