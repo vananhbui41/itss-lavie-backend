@@ -139,7 +139,7 @@ class RequestController extends Controller
                         return $this->error(\null, 'Invalid context ['. $x['context'] .']', 404);
                     }
 
-                    $topics = explode(',', $x['topic']);
+                    $topics = $x['topic'];
                     $topic_id = array();
                     foreach ($topics as $topic) {
                         $result = Tag::where('name', $topic)->first();
@@ -230,7 +230,7 @@ class RequestController extends Controller
                         return $this->error(\null, 'Invalid context ['. $x['context'] .']', 404);
                     }
 
-                    $topics = explode(',', $x['topic']);
+                    $topics = $x['topic'];
                     $topic_id = array();
                     foreach ($topics as $topic) {
                         $result = Tag::where('name', $topic)->first();
