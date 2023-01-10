@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Request as ModelsRequest;
+use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RequestController extends Controller
 {
+    use HttpResponses;
+    
     /**
      * Display a listing of the resource.
      *
@@ -98,6 +101,8 @@ class RequestController extends Controller
      */
     public function destroy($id)
     {
-        //
+        ModelsRequest::destroy($id);
+
+        return $this->success('Request deleted successfully.');
     }
 }

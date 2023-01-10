@@ -27,6 +27,14 @@ class Request extends Model
         return $this->hasMany(RequestMeaning::class);
     }
 
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function($request) { // before delete() method call this
+             $request->requestMeanings()->delete();
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
