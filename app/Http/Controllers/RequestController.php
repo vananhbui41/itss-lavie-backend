@@ -9,7 +9,6 @@ use App\Models\Word;
 use App\Traits\HttpResponses;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -103,6 +102,26 @@ class RequestController extends Controller
         $arr_meanings = $request->meanings;
         $synonym = $request->synonym;
         $antonym = $request->antonym;
+
+
+        if (isset($synonym)) {
+            $synonym = \explode(',', $synonym);
+            foreach ($synonym as $value) {
+                $word2_id = Word::where('word', $value)->first();
+                if ($word2_id == null) {
+                    return $this->error(null, 'Synonym word: '. $value . ' Not found', 404);
+                }
+            }
+        }
+        if (isset($antonym)) {
+            $antonym = \explode(',', $antonym);
+            foreach ($antonym as $value) {
+                $word2_id = Word::where('word', $value)->first();
+                if ($word2_id == null) {
+                    return $this->error(null, 'Antonym word: '. $value . ' Not found', 404);
+                }
+            }
+        }
         
         DB::beginTransaction();
         try {
@@ -120,7 +139,7 @@ class RequestController extends Controller
                         return $this->error(\null, 'Invalid context ['. $x['context'] .']', 404);
                     }
 
-                    $topics = $x['topic'];
+                    $topics = explode(',', $x['topic']);
                     $topic_id = array();
                     foreach ($topics as $topic) {
                         $result = Tag::where('name', $topic)->first();
@@ -132,24 +151,6 @@ class RequestController extends Controller
                     }
                     $x['topic'] = implode(',', $topic_id);
                     $meaning = RequestMeaning::create($x);
-                }
-            }
-            if (isset($synonym)) {
-                $synonym = \explode(',', $synonym);
-                foreach ($synonym as $value) {
-                    $word2_id = Word::where('word', $value)->first();
-                    if ($word2_id == null) {
-                        return $this->error(null, 'Synonym word: '. $value . ' Not found', 404);
-                    }
-                }
-            }
-            if (isset($antonym)) {
-                $antonym = \explode(',', $antonym);
-                foreach ($antonym as $value) {
-                    $word2_id = ModelsRequest::where('word', $value)->first();
-                    if ($word2_id == null) {
-                        return $this->error(null, 'Antonym word: '. $value . ' Not found', 404);
-                    }
                 }
             }
             DB::commit();
@@ -182,7 +183,78 @@ class RequestController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $data = $request->all();
+        $synonym = $request->synonym;
+        $antonym = $request->antonym;
+        if (isset($data['type'])) {  
+            $type = Tag::where('name', $data['type'])->first();
+            if (isset($type)) {
+                $data['type'] = $type->id;
+            } else {
+                return $this->error(null, 'Invalid type ['. $data['type'] .']', 404);
+            }
+        }
+        if (isset($synonym)) {
+            $synonym = \explode(',', $synonym);
+            foreach ($synonym as $value) {
+                $word2_id = Word::where('word', $value)->first();
+                if ($word2_id == null) {
+                    return $this->error(null, 'Synonym word: '. $value . ' Not found', 404);
+                }
+            }
+        }
+        if (isset($antonym)) {
+            $antonym = \explode(',', $antonym);
+            foreach ($antonym as $value) {
+                $word2_id = Word::where('word', $value)->first();
+                if ($word2_id == null) {
+                    return $this->error(null, 'Antonym word: '. $value . ' Not found', 404);
+                }
+            }
+        }
+        $arr_meanings = $request->meanings;
+        
+        DB::beginTransaction();
+        try {
+            $word = ModelsRequest::findOrFail($id);
+            $word->update($data);
+            if (isset($arr_meanings)) {
+                foreach($arr_meanings as $x){
+                    $x['image'] = !empty($x['image']) ? $x['image'] : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU';
+                    $x['request_id'] = $word->id;
+
+                    $context = Tag::where('name', $x['context'])->first();
+                    if (isset($context)) {
+                        $x['context'] = $context->id;
+                    } else {
+                        return $this->error(\null, 'Invalid context ['. $x['context'] .']', 404);
+                    }
+
+                    $topics = explode(',', $x['topic']);
+                    $topic_id = array();
+                    foreach ($topics as $topic) {
+                        $result = Tag::where('name', $topic)->first();
+                        if (isset($result)) {
+                            $topic_id[] = $result->id;
+                        } else {
+                            return $this->error(\null, 'Invalid topic [' .$topic . ']' , 404);
+                        }
+                    }
+                    $x['topic'] = implode(',', $topic_id);
+                    if (isset($x['id'])) {
+                        $meaning = RequestMeaning::findOrFail($x['id']);
+                        $meaning->update($x);
+                    } else {
+                        $meaning = RequestMeaning::create($x);
+                    }
+                }
+            }
+            DB::commit();
+            return $this->success($word, 'Request has been updated successfully');
+        } catch (QueryException $th) {
+            DB::rollBack();
+            return \response()->json($th->errorInfo);
+        }
     }
 
     /**
