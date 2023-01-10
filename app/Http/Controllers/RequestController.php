@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Request as ModelsRequest;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RequestController extends Controller
 {
@@ -72,9 +73,9 @@ class RequestController extends Controller
      */
     public function show($id)
     {
-        $request = ModelsRequest::find($id);
-        $tagsName = $request->getListTagsNames();
-        return \response()->json($tagsName);
+        $request = ModelsRequest::findOrFail($id);
+        $request->requestMeanings;
+        return \response()->json($request);  
     }
 
     /**
