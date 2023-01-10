@@ -30,4 +30,11 @@ class RequestMeaning extends Model
     {
         return $this->belongsTo(Request::class);
     }
+
+    public function contextToIds(array $context)
+    {
+        $id = Tag::find('name', $context);
+
+        return $id->id;
+    }
 }
