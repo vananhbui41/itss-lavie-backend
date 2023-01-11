@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MeaningController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WordController;
+use App\Models\Bookmark;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/histories',[UserController::class,'getHistories']);
     Route::delete('histories/{id}', [UserController::class,'destroyHistory']);
+    Route::resource('bookmarks', BookmarkController::class);
 });
 
 Route::get('view', function () {
