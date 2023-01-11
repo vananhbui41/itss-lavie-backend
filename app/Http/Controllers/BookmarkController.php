@@ -26,9 +26,10 @@ class BookmarkController extends Controller
         if ($bookmark->count() == 0) {
             return $this->success(null,'There no bookmark');
         }
-        $wordIds = $bookmark->pluck('id');
+        $wordIds = $bookmark->pluck('word_id');
         $words = Word::whereIn('id',$wordIds);
         $words = $words->get();
+        
         foreach ($words as $word) {
             $categories = $word->tags()->distinct()->get()->groupBy('category_id');
             foreach ($categories as $key => $category) {
@@ -58,8 +59,8 @@ class BookmarkController extends Controller
                 return $this->error(null, 'This word has already been added to the bookmarks list', 200);
             }
         }
-        $bookmark = $request->all();
-        $bookmark['user_id'] = $user->id;
+        $data = $request->all();
+        $data['user_id'] = $user->id;
         try {
             $bookmark = Bookmark::create($bookmark);
             return $this->success($bookmark, 'Bookmark added');
