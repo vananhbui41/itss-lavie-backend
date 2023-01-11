@@ -6,6 +6,7 @@ use App\Models\Bookmark;
 use App\Models\Category;
 use App\Models\Word;
 use App\Traits\HttpResponses;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,16 +44,6 @@ class BookmarkController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -60,7 +51,21 @@ class BookmarkController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = Auth::user();
+        $bookmarks = Bookmark::where('user_id', $user->id);
+        foreach ($bookmarks->get() as $bookmark) {
+            if ($bookmark->word_id == $request->word_id) {
+                return $this->error(null, 'This word has already been added to the bookmarks list', 200);
+            }
+        }
+        $bookmark = $request->all();
+        $bookmark['user_id'] = $user->id;
+        try {
+            $bookmark = Bookmark::create($bookmark);
+            return $this->success($bookmark, 'Bookmark added');
+        } catch (QueryException $e) {
+            return $this->error(null, $e->getMessage(), 400);
+        }
     }
 
     /**
@@ -71,18 +76,11 @@ class BookmarkController extends Controller
      */
     public function show($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        $bookmark = Bookmark::find($id);
+        if (!$bookmark) {
+            return $this->errorNotFound('Bookmark not found');
+        }
+        return $bookmark;
     }
 
     /**
@@ -105,6 +103,12 @@ class BookmarkController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            $bookmark = Bookmark::findOrFail($id);
+            $bookmark->delete();
+            return $this->success('Bookmark deleted');
+        } catch (QueryException $e) {
+            return $this->error(null, $e->getMessage(), 400);
+        }
     }
 }
