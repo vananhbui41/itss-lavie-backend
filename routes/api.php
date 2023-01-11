@@ -32,7 +32,7 @@ Route::resource('categories', CategoryController::class);
 Route::resource('tags', TagController::class);
 Route::resource('words', WordController::class);
 Route::resource('requests', RequestController::class);
-Route::get('requests/accept/{id}', [RequestController::class, 'accept']);
+Route::post('requests/accept/{id}', [RequestController::class, 'accept']);
 
 // Protected route
 Route::middleware('auth:sanctum')->group(function () {
