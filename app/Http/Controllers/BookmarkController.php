@@ -62,7 +62,7 @@ class BookmarkController extends Controller
         $data = $request->all();
         $data['user_id'] = $user->id;
         try {
-            $bookmark = Bookmark::create($bookmark);
+            $bookmark = Bookmark::create($data);
             return $this->success($bookmark, 'Bookmark added');
         } catch (QueryException $e) {
             return $this->error(null, $e->getMessage(), 400);
