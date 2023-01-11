@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Meaning;
 use App\Models\Request as ModelsRequest;
 use App\Models\RequestMeaning;
 use App\Models\Tag;
@@ -268,5 +269,84 @@ class RequestController extends Controller
         ModelsRequest::destroy($id);
 
         return $this->success('Request deleted successfully.');
+    }
+
+    public function accept($id)
+    {
+        $request = ModelsRequest::findOrFail($id);
+
+        $data = $request->toArray();
+
+        $arr_meanings = $request->requestMeanings();
+
+        $synonym = $request->synonym;
+        $antonym = $request->antonym;
+
+        DB::beginTransaction();
+        try {
+            if ($word = Word::where('word', $request->word)->first()) {
+                $word->update($data);
+            } else {
+                $word = Word::create($data);
+            }
+            if (isset($arr_meanings)) {
+                foreach($arr_meanings->get()->toArray() as $x){
+                    $x['image'] = !empty($x['image']) ? $x['image'] : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNET4coNATuFn3TwH9_dn5FvMp2hjKPANHGA&usqp=CAU';
+                    $x['word_id']= $word->id;
+                    $x['tags_id'] = array();
+                    if (isset($x['context'])) {
+                        $x['tags_id'][] = $x['context'];
+                    }
+
+                    if (isset($x['topic'])) {
+                        $topics_id = explode(',', $x['topic']);
+                        $x['tags_id']= \array_merge($x['tags_id'], $topics_id);
+                    }
+
+                    $meaning = Meaning::create($x);
+                    foreach($x['tags_id'] as $tag_id){
+                        $meaning->tags()->attach($tag_id);
+                    }
+                }
+            }
+            if (isset($synonym)) {
+                $synonym = $synonym->explode(',');
+                foreach ($synonym as $value) {
+                    $word2_id = Word::where('word', $value)->first();
+                    if ($word2_id == null) {
+                        return $this->error(null, 'Related word: '. $value . ' Not found', 200);
+                    }
+                    DB::table('word_relations')
+                        ->updateOrInsert([
+                            'word1_id' => $word->id,
+                            'word2_id' => $word2_id->id,
+                            'relation_type' => 1
+                        ]);
+                }
+            }
+            if (isset($antonym)) {
+                $antonym = $antonym->explode(',');
+                foreach ($antonym as $value) {
+                    $word2_id = Word::where('word', $value)->first();
+                    if ($word2_id == null) {
+                        return $this->error(null, 'Related word: '. $value . ' Not found', 200);
+                    }
+                    DB::table('word_relations')
+                        ->updateOrInsert([
+                            'word1_id' => $word->id,
+                            'word2_id' => $word2_id->id,
+                            'relation_type' => 0
+                        ]);
+                }
+            }
+
+            $request->delete();
+
+            DB::commit();
+            return $this->success($word, 'Word has been created/updated successfully');
+        } catch (QueryException $th) {
+            DB::rollBack();
+            return \response()->json($th->errorInfo);
+        }
     }
 }
