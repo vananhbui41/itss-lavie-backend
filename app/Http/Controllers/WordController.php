@@ -336,10 +336,10 @@ class WordController extends Controller
             $user->words()->syncWithoutDetaching($word_ids);
         }
         
-        $results = $query->get()->toArray();
+        $results = $query->get();
         foreach ($results as $key => $result) {
             $relations = DB::table('word_relations')
-                ->where('word1_id', $result['id'])
+                ->where('word1_id', $result->id)
                 ->get()
                 ->toArray();
             $synonym = [];
@@ -357,6 +357,9 @@ class WordController extends Controller
             }
             $results[$key]['synonym'] = $synonym;
             $results[$key]['antonym'] = $antonym;
+            if (isset($user)) {
+                $results[$key]['bookmark'] = $result->checkBookmark($user);
+            }
         } 
         return \response()->json($results);
     }

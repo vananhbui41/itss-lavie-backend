@@ -105,7 +105,8 @@ class BookmarkController extends Controller
     public function destroy($id)
     {
         try {
-            $bookmark = Bookmark::findOrFail($id);
+            $user = Auth::user();
+            $bookmark = Bookmark::where('user_id', $user->id)->where('word_id', $id);
             $bookmark->delete();
             return $this->success('Bookmark deleted');
         } catch (QueryException $e) {

@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Word::class, 'histories', 'user_id', 'word_id')->withTimestamps();        ;
     }
+
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class, 'user_id');
+    }
 }
