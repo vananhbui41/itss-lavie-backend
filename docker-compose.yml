@@ -22,7 +22,7 @@ services:
     ports:
       - "8080:80"
   db:
-    platform: linux/x86_64
+    # platform: linux/x86_64
     image: mysql:5.7
     container_name: dictionary-mysql-db
     environment:
@@ -31,4 +31,4 @@ services:
       MYSQL_USER: sampleUser
       MYSQL_PASSWORD: password
     ports:
-      - 3306:3306
+      - 3307:3307

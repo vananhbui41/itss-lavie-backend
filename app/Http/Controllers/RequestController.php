@@ -77,7 +77,7 @@ class RequestController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'word' => 'required|unique:words,word|max:255',
+            'word' => 'required|max:255',
             'type' => 'required',
             'meanings.*.meaning' => 'required',
             'meanings.*.explanation_of_meaning' => 'required',
