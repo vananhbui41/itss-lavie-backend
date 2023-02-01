@@ -20,7 +20,8 @@ class Meaning extends Model
         'explanation_of_meaning',
         'example',
         'example_meaning',
-        'image'
+        'image',
+        'source'
     ];
 
     public function tags()
