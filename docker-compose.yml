@@ -31,4 +31,4 @@ services:
       MYSQL_USER: sampleUser
       MYSQL_PASSWORD: password
     ports:
-      - 3307:3307
+      - 3306:3306

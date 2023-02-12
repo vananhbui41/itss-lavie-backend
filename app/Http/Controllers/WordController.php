@@ -303,9 +303,7 @@ class WordController extends Controller
         if (isset($keyword)) {
             try {
                 $query->where(function($q) use ($keyword) {
-                    $q->whereRelation('meanings','meaning','LIKE','%'.$keyword.'%')
-                    ->orWhereRelation('meanings','example','LIKE','%'.$keyword.'%')
-                    ->orWhereRelation('meanings','example_meaning','LIKE','%'.$keyword.'%')
+                    $q->whereRelation('meanings','meaning', 'ILIKE','%'.$keyword.'%')
                     ->orWhere('word','LIKE','%'.$keyword.'%')
                     ->orWhere('furigana','LIKE','%'.$keyword.'%');
                 });
